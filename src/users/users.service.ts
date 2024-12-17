@@ -2,6 +2,7 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import 'dotenv/config';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -22,7 +23,7 @@ export class UsersService {
 
     const user = new User();
     user.userId = userId;
-    const salt = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_SALT_ROUND));
     user.password = await bcrypt.hash(password, salt);
     user.registeredDate = new Date();
 
