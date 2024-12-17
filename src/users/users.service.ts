@@ -27,6 +27,7 @@ export class UsersService {
     user.password = await bcrypt.hash(password, salt);
     user.registeredDate = new Date();
 
-    return this.usersRepository.save(user);
+    await this.usersRepository.save(user);
+    return '아이디 생성에 성공했습니다.';
   }
 }
