@@ -4,6 +4,7 @@ import 'dotenv/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
+import { CustomLoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UsersModule } from './users/users.module';
       synchronize: true,
     }),
     UsersModule,
+    CustomLoggerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
