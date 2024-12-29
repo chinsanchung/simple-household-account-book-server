@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import 'dotenv/config';
+import { JwtService } from '@nestjs/jwt';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CustomLoggerService } from '../logger/logger.service';
@@ -18,6 +19,7 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private readonly logger: CustomLoggerService,
+    private jwtService: JwtService,
   ) {
     this.logger.setContext(UsersService.name);
   }
@@ -64,7 +66,7 @@ export class UsersService {
     }
   }
 
-  async login({ userId, password }: LoginDto) {
+  async login({ userId, password }: LoginDto): Promise<string> {
     try {
       const user = await this.usersRepository.findOne({
         where: { userId },
@@ -75,7 +77,11 @@ export class UsersService {
 
       const isCorrectPassword = await bcrypt.compare(password, user.password);
       if (isCorrectPassword) {
-        return isCorrectPassword;
+        const accessToken = await this.jwtService.signAsync({
+          sub: userId,
+          time: new Date().getTime(),
+        });
+        return accessToken;
       } else {
         throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
       }
