@@ -4,9 +4,12 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../src/users/user.entity';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
+  let jwtService: JwtService;
 
   const mockUsersRepository = {
     findOne: jest.fn(),
@@ -19,9 +22,12 @@ describe('UsersController (e2e)', () => {
     })
       .overrideProvider(getRepositoryToken(User))
       .useValue(mockUsersRepository)
+      .overrideProvider(JwtService)
+      .useValue({ signAsync: jest.fn() })
       .compile();
 
     app = moduleFixture.createNestApplication();
+    jwtService = moduleFixture.get<JwtService>(JwtService);
     app.useGlobalPipes(
       new ValidationPipe({
         transform: true,
@@ -114,6 +120,106 @@ describe('UsersController (e2e)', () => {
             '비밀번호는 최소 10글자, 최대 20글자까지 입력하셔야 합니다.',
           ]);
         });
+    });
+  });
+
+  describe('POST /users/login', () => {
+    it('should login successfully and return JWT token', () => {
+      // Given
+      const loginUser = {
+        userId: 'testuser123',
+        password: 'Test@1234567',
+      };
+      const mockToken = 'mock.jwt.token';
+      mockUsersRepository.findOne.mockResolvedValue({
+        userId: loginUser.userId,
+        password: '$2b$10$abcdefghijklmnopqrstuvwxyz', // 암호화된 비밀번호
+      });
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(true));
+      jest.spyOn(jwtService, 'signAsync').mockResolvedValue(mockToken);
+
+      // When & Then
+      return request(app.getHttpServer())
+        .post('/users/login')
+        .send(loginUser)
+        .expect(201)
+        .expect(mockToken);
+    });
+
+    it('should return 401 when user does not exist', () => {
+      // Given
+      const nonExistentUser = {
+        userId: 'nonexistent',
+        password: 'Test@1234567',
+      };
+      mockUsersRepository.findOne.mockResolvedValue(null);
+
+      // When & Then
+      return request(app.getHttpServer())
+        .post('/users/login')
+        .send(nonExistentUser)
+        .expect(401)
+        .expect({
+          statusCode: 401,
+          message: '존재하지 않는 아이디입니다.',
+          error: 'Unauthorized',
+        });
+    });
+
+    it('should return 401 when password is incorrect', () => {
+      // Given
+      const userWithWrongPassword = {
+        userId: 'testuser123',
+        password: 'WrongPassword@123',
+      };
+      mockUsersRepository.findOne.mockResolvedValue({
+        userId: userWithWrongPassword.userId,
+        password: '$2b$10$abcdefghijklmnopqrstuvwxyz',
+      });
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(false));
+
+      // When & Then
+      return request(app.getHttpServer())
+        .post('/users/login')
+        .send(userWithWrongPassword)
+        .expect(401)
+        .expect({
+          statusCode: 401,
+          message: '비밀번호가 일치하지 않습니다.',
+          error: 'Unauthorized',
+        });
+    });
+
+    it('should return 401 when userId is empty', () => {
+      // Given
+      const invalidUser = {
+        userId: '',
+        password: 'Test@1234567',
+      };
+
+      // When & Then
+      return request(app.getHttpServer())
+        .post('/users/login')
+        .send(invalidUser)
+        .expect(401);
+    });
+
+    it('should return 401 when password is empty', () => {
+      // Given
+      const invalidUser = {
+        userId: 'testuser123',
+        password: '',
+      };
+
+      // When & Then
+      return request(app.getHttpServer())
+        .post('/users/login')
+        .send(invalidUser)
+        .expect(401);
     });
   });
 });
