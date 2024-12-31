@@ -66,6 +66,10 @@ export class UsersService {
     }
   }
 
+  async findOneByUserId(userId: string) {
+    return this.usersRepository.findOne({ where: { userId } });
+  }
+
   async login({ userId, password }: LoginDto): Promise<string> {
     try {
       const user = await this.usersRepository.findOne({
