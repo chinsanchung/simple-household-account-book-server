@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Category } from '../category/category.entity';
-import { PaymentMethod } from '../paymentMethod/payment-method.entity';
+import { PaymentMethod } from '../payment-method/payment-method.entity';
 
 @Entity()
 export class AccountBook {
