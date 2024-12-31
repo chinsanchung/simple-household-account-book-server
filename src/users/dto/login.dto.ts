@@ -3,7 +3,7 @@ import { CreateUserDto } from './create-user.dto';
 
 export class LoginDto extends CreateUserDto {
   @ValidateIf(() => false)
-  override userId: string;
+  override userName: string;
 
   @ValidateIf(() => false)
   override password: string;

@@ -38,7 +38,7 @@ describe('UsersController', () => {
     it('should create a new user', async () => {
       // Given
       const createUserDto: CreateUserDto = {
-        userId: 'testuser123',
+        userName: 'testuser123',
         password: 'Test@1234567',
       };
       const expectedResult = '아이디 생성에 성공했습니다.';
@@ -56,7 +56,7 @@ describe('UsersController', () => {
     it('should handle service errors', async () => {
       // Given
       const createUserDto: CreateUserDto = {
-        userId: 'testuser123',
+        userName: 'testuser123',
         password: 'Test@1234567',
       };
       const errorMessage = '이미 같은 이름의 아이디가 있습니다.';
@@ -73,7 +73,7 @@ describe('UsersController', () => {
 
   describe('login', () => {
     const mockLoginDto: LoginDto = {
-      userId: 'testuser123',
+      userName: 'testuser123',
       password: 'Test@1234567',
     };
 
@@ -135,7 +135,7 @@ describe('UsersController', () => {
     it('should validate login input data', async () => {
       // Given
       const invalidLoginDto = {
-        userId: '', // empty userId
+        userName: '', // empty userName
         password: 'Test@1234567',
       };
 
