@@ -8,8 +8,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
-import { Category } from './category.entity';
-import { PaymentMethod } from './payment-method.entity';
+import { Category } from '../category/category.entity';
+import { PaymentMethod } from '../paymentMethod/payment-method.entity';
 
 @Entity()
 export class AccountBook {
