@@ -47,7 +47,7 @@ describe('UsersController (e2e)', () => {
     it('should create a new user successfully', () => {
       // Given
       const newUser = {
-        userId: 'testuser123',
+        userName: 'testuser123',
         password: 'Test@1234567',
       };
       mockUsersRepository.findOne.mockResolvedValue(null);
@@ -64,7 +64,7 @@ describe('UsersController (e2e)', () => {
     it('should return 409 when user already exists', () => {
       // Given
       const existingUser = {
-        userId: 'testuser123',
+        userName: 'testuser123',
         password: 'Test@1234567',
       };
       mockUsersRepository.findOne.mockResolvedValue(existingUser);
@@ -81,10 +81,10 @@ describe('UsersController (e2e)', () => {
         });
     });
 
-    it('should return 400 when userId is too short', () => {
+    it('should return 400 when userName is too short', () => {
       // Given
       const invalidUser = {
-        userId: 'test', // 7글자 미만
+        userName: 'test', // 7글자 미만
         password: 'Test@1234567',
       };
       mockUsersRepository.findOne.mockResolvedValue(null);
@@ -104,7 +104,7 @@ describe('UsersController (e2e)', () => {
     it('should return 400 when password format is invalid', () => {
       // Given
       const invalidUser = {
-        userId: 'testuser123',
+        userName: 'testuser123',
         password: 'invalidpw', // 특수문자, 대문자 없음, 길이 부족
       };
       mockUsersRepository.findOne.mockResolvedValue(null);
@@ -127,12 +127,12 @@ describe('UsersController (e2e)', () => {
     it('should login successfully and return JWT token', () => {
       // Given
       const loginUser = {
-        userId: 'testuser123',
+        userName: 'testuser123',
         password: 'Test@1234567',
       };
       const mockToken = 'mock.jwt.token';
       mockUsersRepository.findOne.mockResolvedValue({
-        userId: loginUser.userId,
+        userName: loginUser.userName,
         password: '$2b$10$abcdefghijklmnopqrstuvwxyz', // 암호화된 비밀번호
       });
       jest
@@ -151,7 +151,7 @@ describe('UsersController (e2e)', () => {
     it('should return 401 when user does not exist', () => {
       // Given
       const nonExistentUser = {
-        userId: 'nonexistent',
+        userName: 'nonexistent',
         password: 'Test@1234567',
       };
       mockUsersRepository.findOne.mockResolvedValue(null);
@@ -171,11 +171,11 @@ describe('UsersController (e2e)', () => {
     it('should return 401 when password is incorrect', () => {
       // Given
       const userWithWrongPassword = {
-        userId: 'testuser123',
+        userName: 'testuser123',
         password: 'WrongPassword@123',
       };
       mockUsersRepository.findOne.mockResolvedValue({
-        userId: userWithWrongPassword.userId,
+        userName: userWithWrongPassword.userName,
         password: '$2b$10$abcdefghijklmnopqrstuvwxyz',
       });
       jest
@@ -194,10 +194,10 @@ describe('UsersController (e2e)', () => {
         });
     });
 
-    it('should return 401 when userId is empty', () => {
+    it('should return 401 when userName is empty', () => {
       // Given
       const invalidUser = {
-        userId: '',
+        userName: '',
         password: 'Test@1234567',
       };
 
@@ -211,7 +211,7 @@ describe('UsersController (e2e)', () => {
     it('should return 401 when password is empty', () => {
       // Given
       const invalidUser = {
-        userId: 'testuser123',
+        userName: 'testuser123',
         password: '',
       };
 

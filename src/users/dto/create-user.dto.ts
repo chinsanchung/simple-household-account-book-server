@@ -5,7 +5,7 @@ export class CreateUserDto {
   @Length(7, 15, {
     message: '아이디는 최소 7글자, 최대 15글자까지 입력하셔야 합니다.',
   })
-  userId: string;
+  userName: string;
 
   @IsString()
   @Length(10, 20, {

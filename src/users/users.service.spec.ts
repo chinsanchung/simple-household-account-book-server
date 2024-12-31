@@ -54,7 +54,7 @@ describe('UsersService', () => {
 
   describe('create', () => {
     const mockCreateUserDto = {
-      userId: 'testuser123',
+      userName: 'testuser123',
       password: 'Test@1234567',
     };
 
@@ -69,7 +69,7 @@ describe('UsersService', () => {
       // Then
       expect(result).toBe('아이디 생성에 성공했습니다.');
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { userId: mockCreateUserDto.userId },
+        where: { userName: mockCreateUserDto.userName },
       });
       expect(repository.save).toHaveBeenCalled();
       // Logger should not have been called for successful creation
@@ -87,11 +87,11 @@ describe('UsersService', () => {
         new ConflictException('이미 같은 이름의 아이디가 있습니다.'),
       );
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { userId: mockCreateUserDto.userId },
+        where: { userName: mockCreateUserDto.userName },
       });
       // Verify warning was logged
       expect(logger.warn).toHaveBeenCalledWith(
-        `USER CREATE - Attempted to create duplicate user: ${mockCreateUserDto.userId}`,
+        `USER CREATE - Attempted to create duplicate user: ${mockCreateUserDto.userName}`,
       );
     });
 
@@ -108,7 +108,7 @@ describe('UsersService', () => {
       );
       // Verify error was logged
       expect(logger.error).toHaveBeenCalledWith(
-        `USER CREATE - Failed to create user ${mockCreateUserDto.userId}`,
+        `USER CREATE - Failed to create user ${mockCreateUserDto.userName}`,
         expect.any(String),
       );
     });
@@ -134,14 +134,14 @@ describe('UsersService', () => {
 
   describe('login', () => {
     const mockLoginDto = {
-      userId: 'testuser123',
+      userName: 'testuser123',
       password: 'Test@1234567',
     };
 
-    it('should throw UnauthorizedException if userId is empty', async () => {
+    it('should throw UnauthorizedException if userName is empty', async () => {
       // When & Then
       await expect(
-        service.login({ ...mockLoginDto, userId: '' }),
+        service.login({ ...mockLoginDto, userName: '' }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -161,7 +161,7 @@ describe('UsersService', () => {
         new UnauthorizedException('존재하지 않는 아이디입니다.'),
       );
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { userId: mockLoginDto.userId },
+        where: { userName: mockLoginDto.userName },
       });
     });
 
@@ -192,7 +192,7 @@ describe('UsersService', () => {
       // Then
       expect(result).toBe(mockToken);
       expect(jwtService.signAsync).toHaveBeenCalledWith({
-        sub: mockLoginDto.userId,
+        sub: mockLoginDto.userName,
         time: expect.any(Number),
       });
     });
