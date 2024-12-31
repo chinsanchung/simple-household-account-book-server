@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -11,7 +7,6 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CustomLoggerService } from '../logger/logger.service';
-import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class UsersService {
@@ -68,32 +63,5 @@ export class UsersService {
 
   async findOneByUserId(userName: string) {
     return this.usersRepository.findOne({ where: { userName } });
-  }
-
-  async login({ userName, password }: LoginDto): Promise<string> {
-    try {
-      const user = await this.usersRepository.findOne({
-        where: { userName },
-      });
-      if (!user) {
-        throw new UnauthorizedException('존재하지 않는 아이디입니다.');
-      }
-
-      const isCorrectPassword = await bcrypt.compare(password, user.password);
-      if (isCorrectPassword) {
-        const accessToken = await this.jwtService.signAsync({
-          sub: userName,
-          time: new Date().getTime(),
-        });
-        return accessToken;
-      } else {
-        throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
-      }
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      throw new Error('로그인 과정에서 오류가 발생했습니다.');
-    }
   }
 }
