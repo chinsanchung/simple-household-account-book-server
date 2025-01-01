@@ -5,6 +5,7 @@ import {
   UseGuards,
   Get,
   Param,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AccountBookService } from './account-book.service';
@@ -19,6 +20,11 @@ export class AccountBookController {
     const user = req.user;
     const createDto = req.body;
     return this.accountBookService.create({ createDto, user });
+  }
+
+  @Get('/search')
+  async search(@Query() query) {
+    return this.accountBookService.search(query);
   }
 
   @UseGuards(JwtAuthGuard)
