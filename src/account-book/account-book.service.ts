@@ -35,7 +35,7 @@ export class AccountBookService {
 
       return accountBook;
     } catch (error) {
-      this.logger.error('account-book CREATE', error.stac);
+      this.logger.error('account-book CREATE', error.stack);
       throw new Error('에러가 발생했습니다.');
     }
   }
