@@ -14,7 +14,7 @@ import { AccountBookModule } from './account-book/account-book.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: process.env.MYSQL_HOST || 'localhost',
       port: parseInt(process.env.MYSQL_PORT),
       username: process.env.MYSQL_USER_NAME,
       password: process.env.MYSQL_USER_PASSWORD,
