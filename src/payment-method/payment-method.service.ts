@@ -38,7 +38,10 @@ export class PaymentMethodService {
       return paymentMethod;
     } catch (error) {
       this.logger.error('paymentMethod CREATE', error.stack);
-      throw new Error('paymentMethod 생성에 오류가 발생했습니다.');
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new Error('결제 방법 생성에 오류가 발생했습니다.');
     }
   }
 }
