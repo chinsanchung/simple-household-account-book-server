@@ -13,6 +13,9 @@ export class PaymentMethod {
   @Column({ length: 30, unique: true })
   name: string;
 
+  @Column({ length: 50, unique: false })
+  label: string;
+
   @Column({ default: true })
   isActive: boolean;
 
