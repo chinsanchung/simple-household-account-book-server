@@ -1,4 +1,11 @@
-import { Request, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Request,
+  Controller,
+  Post,
+  UseGuards,
+  Get,
+  Param,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AccountBookService } from './account-book.service';
 
@@ -12,5 +19,11 @@ export class AccountBookController {
     const user = req.user;
     const createDto = req.body;
     return this.accountBookService.create({ createDto, user });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:idx')
+  async getAccountBook(@Param('idx') idx: number) {
+    return this.accountBookService.getAccountBook(idx);
   }
 }

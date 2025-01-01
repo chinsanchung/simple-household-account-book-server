@@ -39,4 +39,29 @@ export class AccountBookService {
       throw new Error('에러가 발생했습니다.');
     }
   }
+  /**@description 상세 조회 */
+  async getAccountBook(idx: number) {
+    const accountBook = await this.accountBookRepository.findOne({
+      where: { idx },
+      select: {
+        idx: true,
+        title: true,
+        paymentType: true,
+        paymentAmount: true,
+        createdAt: true,
+        category: {
+          name: true,
+        },
+        paymentMethod: {
+          name: true,
+        },
+      },
+      relations: {
+        category: true,
+        paymentMethod: true,
+      },
+    });
+
+    return accountBook;
+  }
 }
