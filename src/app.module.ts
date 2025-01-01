@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { CustomLoggerModule } from './logger/logger.module';
 import { AuthModule } from './auth/auth.module';
+import { PaymentMethodModule } from './payment-method/payment-method.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     CustomLoggerModule,
     AuthModule,
+    PaymentMethodModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
