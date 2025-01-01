@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { AccountBook } from './account-book.entity';
 import { CustomLoggerService } from '../logger/logger.service';
 import { CreateAccountBookDto } from './dto/create-account-book.dto';
+import { SearchAccountBookDto } from './dto/search-account-book.dto';
 
 @Injectable()
 export class AccountBookService {
@@ -37,6 +38,75 @@ export class AccountBookService {
     } catch (error) {
       this.logger.error('account-book CREATE', error.stack);
       throw new Error('에러가 발생했습니다.');
+    }
+  }
+  /**@description 상세 조회 */
+  async getAccountBook(idx: number) {
+    try {
+      const accountBook = await this.accountBookRepository.findOne({
+        where: { idx },
+        select: {
+          idx: true,
+          title: true,
+          paymentType: true,
+          paymentAmount: true,
+          createdAt: true,
+          category: {
+            name: true,
+          },
+          paymentMethod: {
+            name: true,
+          },
+        },
+        relations: {
+          category: true,
+          paymentMethod: true,
+        },
+      });
+
+      return accountBook;
+    } catch (error) {
+      this.logger.error('account-book GET idx', error.stack);
+      throw new Error('조회 과정에서 에러가 발생했습니다.');
+    }
+  }
+
+  /**@description 검색 */
+  async search(searchFilter: SearchAccountBookDto) {
+    try {
+      const whereCondition: any = {};
+      if (searchFilter.startDate && searchFilter.endDate) {
+        whereCondition.createdAt = Between(
+          searchFilter.startDate,
+          searchFilter.endDate,
+        );
+      }
+
+      const accountBook = await this.accountBookRepository.find({
+        where: whereCondition,
+        select: {
+          idx: true,
+          title: true,
+          paymentType: true,
+          paymentAmount: true,
+          createdAt: true,
+          category: {
+            name: true,
+          },
+          paymentMethod: {
+            name: true,
+          },
+        },
+        relations: {
+          category: true,
+          paymentMethod: true,
+        },
+      });
+
+      return accountBook;
+    } catch (error) {
+      this.logger.error('account-book GET search', error.stack);
+      throw new Error('검색 과정에서 에러가 발생했습니다.');
     }
   }
 }
