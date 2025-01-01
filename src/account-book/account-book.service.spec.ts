@@ -27,6 +27,7 @@ describe('AccountBookService', () => {
           provide: getRepositoryToken(AccountBook),
           useValue: {
             save: jest.fn(),
+            findOne: jest.fn(),
           },
         },
         {
@@ -146,6 +147,87 @@ describe('AccountBookService', () => {
       // When & Then
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('getAccountBook', () => {
+    const mockIdx = 1;
+    const mockAccountBook = {
+      idx: mockIdx,
+      title: 'Test Account Book',
+      paymentType: 'expense',
+      paymentAmount: 10000,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      categoryId: 1,
+      paymentMethodId: 1,
+      userId: 1,
+      category: {
+        name: 'Food',
+      },
+      paymentMethod: {
+        name: 'Cash',
+      },
+    } as AccountBook;
+
+    it('should return account book details successfully', async () => {
+      // Given
+      jest.spyOn(repository, 'findOne').mockResolvedValue(mockAccountBook);
+
+      // When
+      const result = await service.getAccountBook(mockIdx);
+
+      // Then
+      expect(result).toEqual(mockAccountBook);
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { idx: mockIdx },
+        select: {
+          idx: true,
+          title: true,
+          paymentType: true,
+          paymentAmount: true,
+          createdAt: true,
+          category: {
+            name: true,
+          },
+          paymentMethod: {
+            name: true,
+          },
+        },
+        relations: {
+          category: true,
+          paymentMethod: true,
+        },
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('should return null when account book is not found', async () => {
+      // Given
+      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+      // When
+      const result = await service.getAccountBook(mockIdx);
+
+      // Then
+      expect(result).toBeNull();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('should handle database errors', async () => {
+      // Given
+      jest
+        .spyOn(repository, 'findOne')
+        .mockRejectedValue(new Error('Database error'));
+
+      // When & Then
+      await expect(service.getAccountBook(mockIdx)).rejects.toThrow(
+        '조회 과정에서 에러가 발생했습니다.',
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        'account-book GET idx',
+        expect.any(String),
+      );
     });
   });
 });

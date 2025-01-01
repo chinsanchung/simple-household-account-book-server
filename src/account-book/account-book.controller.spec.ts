@@ -13,6 +13,7 @@ describe('AccountBookController', () => {
     // Mock AccountBookService
     const mockAccountBookService = {
       create: jest.fn(),
+      getAccountBook: jest.fn(),
     };
 
     // Mock JwtAuthGuard
@@ -108,6 +109,64 @@ describe('AccountBookController', () => {
       // When & Then
       await expect(controller.create(mockRequest)).rejects.toThrow(
         'Service error',
+      );
+    });
+  });
+
+  describe('getAccountBook', () => {
+    const mockIdx = 1;
+    const mockAccountBook = {
+      idx: mockIdx,
+      title: 'Test Account Book',
+      paymentType: 'expense',
+      paymentAmount: 10000,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      categoryId: 1,
+      paymentMethodId: 1,
+      userId: 1,
+      user: { id: 1, userName: 'testuser' },
+      category: {
+        name: 'Food',
+      },
+      paymentMethod: {
+        name: 'Cash',
+      },
+    } as AccountBook;
+
+    it('should return account book details successfully', async () => {
+      // Given
+      jest.spyOn(service, 'getAccountBook').mockResolvedValue(mockAccountBook);
+
+      // When
+      const result = await controller.getAccountBook(mockIdx);
+
+      // Then
+      expect(result).toBe(mockAccountBook);
+      expect(service.getAccountBook).toHaveBeenCalledWith(mockIdx);
+    });
+
+    it('should return null when account book is not found', async () => {
+      // Given
+      jest.spyOn(service, 'getAccountBook').mockResolvedValue(null);
+
+      // When
+      const result = await controller.getAccountBook(mockIdx);
+
+      // Then
+      expect(result).toBeNull();
+      expect(service.getAccountBook).toHaveBeenCalledWith(mockIdx);
+    });
+
+    it('should handle service errors', async () => {
+      // Given
+      jest
+        .spyOn(service, 'getAccountBook')
+        .mockRejectedValue(new Error('조회 과정에서 에러가 발생했습니다.'));
+
+      // When & Then
+      await expect(controller.getAccountBook(mockIdx)).rejects.toThrow(
+        '조회 과정에서 에러가 발생했습니다.',
       );
     });
   });
