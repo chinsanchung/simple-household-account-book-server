@@ -41,27 +41,32 @@ export class AccountBookService {
   }
   /**@description 상세 조회 */
   async getAccountBook(idx: number) {
-    const accountBook = await this.accountBookRepository.findOne({
-      where: { idx },
-      select: {
-        idx: true,
-        title: true,
-        paymentType: true,
-        paymentAmount: true,
-        createdAt: true,
-        category: {
-          name: true,
+    try {
+      const accountBook = await this.accountBookRepository.findOne({
+        where: { idx },
+        select: {
+          idx: true,
+          title: true,
+          paymentType: true,
+          paymentAmount: true,
+          createdAt: true,
+          category: {
+            name: true,
+          },
+          paymentMethod: {
+            name: true,
+          },
         },
-        paymentMethod: {
-          name: true,
+        relations: {
+          category: true,
+          paymentMethod: true,
         },
-      },
-      relations: {
-        category: true,
-        paymentMethod: true,
-      },
-    });
+      });
 
-    return accountBook;
+      return accountBook;
+    } catch (error) {
+      this.logger.error('account-book GET idx', error.stack);
+      throw new Error('조회 과정에서 에러가 발생했습니다.');
+    }
   }
 }
