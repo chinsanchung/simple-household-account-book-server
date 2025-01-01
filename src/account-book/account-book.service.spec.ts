@@ -6,6 +6,7 @@ import { AccountBook } from './account-book.entity';
 import { CustomLoggerService } from '../logger/logger.service';
 import { CreateAccountBookDto } from './dto/create-account-book.dto';
 import { validate } from 'class-validator';
+import { Between } from 'typeorm';
 
 describe('AccountBookService', () => {
   let service: AccountBookService;
@@ -28,6 +29,7 @@ describe('AccountBookService', () => {
           useValue: {
             save: jest.fn(),
             findOne: jest.fn(),
+            find: jest.fn(),
           },
         },
         {
@@ -226,6 +228,117 @@ describe('AccountBookService', () => {
       );
       expect(logger.error).toHaveBeenCalledWith(
         'account-book GET idx',
+        expect.any(String),
+      );
+    });
+  });
+
+  describe('search', () => {
+    const mockAccountBooks = [
+      {
+        idx: 1,
+        title: 'Test Account Book 1',
+        paymentType: 'expense',
+        paymentAmount: 10000,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        categoryId: 1,
+        paymentMethodId: 1,
+        userId: 1,
+        category: {
+          name: 'Food',
+        },
+        paymentMethod: {
+          name: 'Cash',
+        },
+      },
+      {
+        idx: 2,
+        title: 'Test Account Book 2',
+        paymentType: 'income',
+        paymentAmount: 20000,
+        createdAt: new Date('2024-01-02'),
+        updatedAt: new Date('2024-01-02'),
+        categoryId: 2,
+        paymentMethodId: 2,
+        userId: 1,
+        category: {
+          name: 'Salary',
+        },
+        paymentMethod: {
+          name: 'Bank',
+        },
+      },
+    ] as AccountBook[];
+
+    it('should return account books with date filter', async () => {
+      // Given
+      const searchFilter = {
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+      };
+      jest.spyOn(repository, 'find').mockResolvedValue(mockAccountBooks);
+
+      // When
+      const result = await service.search(searchFilter);
+
+      // Then
+      expect(result).toEqual(mockAccountBooks);
+      expect(repository.find).toHaveBeenCalledWith({
+        where: {
+          createdAt: Between(searchFilter.startDate, searchFilter.endDate),
+        },
+        select: {
+          idx: true,
+          title: true,
+          paymentType: true,
+          paymentAmount: true,
+          createdAt: true,
+          category: {
+            name: true,
+          },
+          paymentMethod: {
+            name: true,
+          },
+        },
+        relations: {
+          category: true,
+          paymentMethod: true,
+        },
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('should return all account books when no date filter provided', async () => {
+      // Given
+      const searchFilter = {};
+      jest.spyOn(repository, 'find').mockResolvedValue(mockAccountBooks);
+
+      // When
+      const result = await service.search(searchFilter);
+
+      // Then
+      expect(result).toEqual(mockAccountBooks);
+      expect(repository.find).toHaveBeenCalledWith({
+        where: {},
+        select: expect.any(Object),
+        relations: expect.any(Object),
+      });
+    });
+
+    it('should handle database errors', async () => {
+      // Given
+      const searchFilter = {};
+      jest
+        .spyOn(repository, 'find')
+        .mockRejectedValue(new Error('Database error'));
+
+      // When & Then
+      await expect(service.search(searchFilter)).rejects.toThrow(
+        '검색 과정에서 에러가 발생했습니다.',
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        'account-book GET search',
         expect.any(String),
       );
     });
